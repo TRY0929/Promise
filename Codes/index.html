@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>自定义Promise</title>
+</head>
+<body>
+  <script src="./lib/then.js"></script>
+  <script>
+    const p = new Promise((resolve, reject) => {
+      reject(3)
+    }).then(
+      value => {
+        console.log('onResolved()1 ', value)
+      },
+      reason => {
+        console.log('onRejected()1 ', reason)
+        return 10
+      }
+    ).then(
+      value => {
+        console.log('onResolved()2 ', value)
+      },
+      reason => {
+        console.log('onRejected()2 ', reason)
+      }
+    )
+  </script>
+</body>
+</html>
