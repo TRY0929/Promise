@@ -10,29 +10,30 @@
 
     function resolve(value) {
       if (_this.status !== PENDING) {
-        return
+        return 
       }
       _this.status = FULFILLED
       _this.data = value
       if (_this.callbacks) {
-        setTimeout(() => {
+        setTimeout (() => {
           _this.callbacks.forEach((callbackObj, index) => {
-            callbackObj.onResolved(value)
+            callbackObj.onResolved(reason)
           })
         }, 0)
       }
+      
     }
 
     function reject(reason) {
       if (_this.status !== PENDING) {
-        return
+        return 
       }
       _this.status = REJECTED
       _this.data = reason
       if (_this.callbacks) {
-        setTimeout(() => {
+        setTimeout (() => {
           _this.callbacks.forEach((callbackObj, index) => {
-            callbackObj.onRejected(value)
+            callbackObj.onRejected(reason)
           })
         }, 0)
       }
@@ -40,17 +41,16 @@
 
     try {
       excutor(resolve, reject)
-    } catch (error) {
+    } catch(error) {
       reject(error)
     }
-    
   }
 
-  Promise.prototype.then = function (onResolved, onRejected) {
-    const _this = this
+  Promise.prototype.then(onResolved, onRejected) {
     onResolved = typeof onResolved === 'function' ? onResolved : value => value
     onRejected = typeof onRejected === 'function' ? onRejected : reason => {throw reason}
-
+    const _this = this
+    
     return new Promise((resolve, reject) => {
       function handle (callback) {
         try {
@@ -63,73 +63,82 @@
         } catch (error) {
           reject(error)
         }
-        
       }
       if (_this.status === PENDING) {
         _this.callbacks.push({
-          onResolved (value) {handle(onResolved)},
-          onRejected (reason) {handle(onRejected)}
+          onResolved (value) {
+            handle (onResolved)
+          },
+          onRejected (reason) {
+            handle (onRejected)
+          }
         })
       } else if (_this.status === FULFILLED) {
         setTimeout(() => {
-          handle(onResolved)
+          handle (onResolved)
         }, 0)
       } else {
         setTimeout(() => {
-          handle(onRejected)
+          handle (onRejected)
         }, 0)
       }
     })
   }
 
-  Promise.prototype.catch = function (onRejected) {
-    this.then(undefined, onRejected)
+  Promise.prototype.catch(onRejected) {
+    this.prototype.then(undefined, onRejected)
   }
 
-  Promise.resolve = function (value) {
-    return new Promise ((resolve, reject) => {
+  Promise.resolve(value) {
+    return new Promise((resolve, reject) => {
       if (value instanceof Promise) {
-        value.then(resole, reject)
+        value.then(resolve, reject)
       } else {
         resolve(value)
       }
     })
   }
 
-  Promise.reject = function (reason) {
-    return new Promise ((resolve, reject) => {
+  Promise.reject(reason) {
+    return new Promise((resolve, reject) => {
       reject(reason)
     })
   }
 
-  Promise.all = function (promises) {
-    const values = new Array(promises.length)
-    const cnt = 0
+  Promise.all(promises) {
     return new Promise((resolve, reject) => {
+      const values = new Array(promises.length)
+      let cnt = 0
       promises.forEach((p, index) => {
         if (p instanceof Promise) {
           p.then(
               value => {
                 values[index] = value
                 cnt++
-                if (cnt === promises.length) {
+                if(cnt === promises.length) {
                   resolve(values)
                 }
               },
-              reason => {reject(reason)}
+              reason => {
+                reject(reason)
+              }
             )
         }
       })
     })
   }
 
-  Promise.race = function (promises) {
+  Promise.race(promises) {
     return new Promise((resolve, reject) => {
       promises.forEach((p, index) => {
-        p.then(resolve, reject)
+        if (p instanceof Promise) {
+          p.then(resolve, reason)
+        } else {
+          resolve(p)
+        }
       })
     })
   }
 
-  window.Promise = Promise
+  window.Promise = Promise 
 })(window)
